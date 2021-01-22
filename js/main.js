@@ -1,5 +1,6 @@
 // Global:
 var taskList = new TaskList();
+var validation = new Validation();
 
 
 function getEle(id) {
@@ -9,96 +10,78 @@ function getEle(id) {
 // Nội dung trong task
 function contentFromTask() {
     var _task = getEle("newTask").value;
-    return _task
+    var isValid = true;
+    isValid &= validation.kiemTraRong(_task) && validation.kiemTraTrungTen(_task, "(*) Đã có Task trùng", taskList.arr)
+
+    if (isValid) {
+        var task = new Task(
+            _task,
+        );
+        return task
+    }
+    return null
 }
 
 getLocalStorage();
 
 
 
-// Tạo bảng toDo
-function createTableToDo(arr) {
+// Tạo bảng 
+function createTable(arr) {
     var tableToDo = "";
-    for (var i = 0; i < arr.length; i++) {
-        tableToDo +=
-            `
-            <li> <span> ${arr[i].task} </span>
-                <span>
-                <button class="icon__fontAwesome" onclick="deleteTask(${arr[i].id})"><i class="fas fa-trash-alt"></i></button> 
-                <button class="icon__fontAwesome" onclick="changeTask(${arr[i].id})" ><i class="far fa-check-circle"></i></button>
-                </span>
-                </li>
-            `;
-    }
-    getEle("todo").innerHTML = tableToDo
-        // getEle("todo").style.display = "block"
-        // getEle("completed").style.display = "none"
-
-
-
-}
-
-// Tạo bảng Completed: 
-function createTableCompleted(arr) {
     var tableCompleted = "";
     for (var i = 0; i < arr.length; i++) {
-        tableCompleted +=
-            `
-                <li> <span id="txtCompleted"> ${arr[i].task} </span>
-                <span>
-                <button class="icon__fontAwesome" id="txtToDo" onclick="deleteTask(${arr[i].id})"><i class="fas fa-trash-alt"></i></button> 
-                <button class="icon__fontAwesome" onclick="changeTask(${arr[i].id})" ><i class="far fa-check-circle"></i></button>
-                </span>
-                </li>
+        if (arr[i].status == false) {
+            tableToDo +=
+                `
+            <li> <span> ${arr[i].task} </span>
+                <div class="buttons">
+                <button class="remove" onclick="deleteTask(${arr[i].id})"><i class="fas fa-trash-alt"></i></button> 
+                <button class="complete" onclick="changeTask(${arr[i].id})" ><i class="far fa-check-circle"></i></button>
+                </div>
             `;
+
+        } else {
+            tableCompleted +=
+                `
+                <li> <span id="txtCompleted"> ${arr[i].task} </span>
+                <div class="buttons">               
+                <button class="remove" onclick="deleteTask(${arr[i].id})"><i class="fas fa-trash-alt"></i></button> 
+                <button class="complete" onclick="changeTask(${arr[i].id})" ><i class="fas fa-check-circle"></i></button>
+                </div>
+            `;
+        }
     }
     getEle("completed").innerHTML = tableCompleted
-        // getEle("todo").style.display = "none"
-        // getEle("completed").style.display = "block"
-
-
-
+    getEle("todo").innerHTML = tableToDo
 }
+
 
 // Thêm task
 function addTask() {
-    var content = new Task(contentFromTask());
-    if (content.task === "") {
-        alert("Task Empty!")
-    } else {
-        alert("Add success!")
+    var content = contentFromTask()
+    if (content !== null) {
         taskList.addTask(content);
-        createTableToDo(taskList.arr);
+        createTable(taskList.arr)
         setLocalStorage();
     }
-    console.log(content);
 }
 
 // Chuyển Task
-function changeTask(arr) {
-    var content = new Task(contentFromTask());
-
-    if (content.status == false) {
-        content.status = true
-        createTableCompleted(taskList.arr)
-
-    }
-};
-// Xóa Task
-function deleteTask(arr) {
-    taskList.deleteTask(arr);
-    createTableToDo(taskList.arr);
-    createTableCompleted(taskList.arr)
+function changeTask(maId) {
+    alert("Change Status Success!")
+    taskList.updateTask(maId);
+    createTable(taskList.arr);
     setLocalStorage();
 }
 
-
-
-
-
-
-
-
+// Xóa Task
+function deleteTask(arr) {
+    alert("Delete Status Success!")
+    taskList.deleteTask(arr);
+    createTable(taskList.arr);
+    setLocalStorage();
+}
 
 
 // Set local
@@ -111,6 +94,6 @@ function setLocalStorage() {
 function getLocalStorage() {
     if (JSON.parse(localStorage.getItem("TASK"))) {
         taskList.arr = JSON.parse(localStorage.getItem("TASK"));
-        createTableToDo(taskList.arr);
+        createTable(taskList.arr);
     }
 }

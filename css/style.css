@@ -332,18 +332,3 @@ ul.todo#completed span {
 .alert-danger {
     color: red;
 }
-
-
-/* Icon font awesome */
-
-.icon__fontAwesome {
-    background-color: white;
-    border: none;
-    font-size: 16px;
-}
-
-.icon__fontAwesome:hover {
-    color: rgb(240, 98, 122);
-    outline: none;
-    cursor: pointer;
-}
