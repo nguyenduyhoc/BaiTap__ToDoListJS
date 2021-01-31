@@ -1,16 +1,18 @@
 // Global:
 var taskList = new TaskList();
 var validation = new Validation();
-
+var service = new TaskService();
 
 function getEle(id) {
     return document.getElementById(id);
 }
 
+
 // Nội dung trong task
 function contentFromTask() {
     var _task = getEle("newTask").value;
     var isValid = true;
+
     isValid &= validation.kiemTraRong(_task) && validation.kiemTraTrungTen(_task, "(*) Đã có Task trùng", taskList.arr)
 
     if (isValid) {
@@ -20,9 +22,11 @@ function contentFromTask() {
         return task
     }
     return null
+
+
 }
 
-getLocalStorage();
+
 
 
 
@@ -55,32 +59,69 @@ function createTable(arr) {
     getEle("completed").innerHTML = tableCompleted
     getEle("todo").innerHTML = tableToDo
 }
+// Lay danh sach task
+function getTaskService() {
+    service
+        .getListTaskService()
+        .then(function(result) {
+            console.log(result.data);
+            createTable(result.data)
+        })
+        .catch(function(err) {
+            console.log(err);
+        });
+}
+
+getTaskService()
+
 
 
 // Thêm task
 function addTask() {
     var content = contentFromTask()
     if (content !== null) {
-        taskList.addTask(content);
-        createTable(taskList.arr)
-        setLocalStorage();
+        service.addTaskService(content)
+            .then(function(result) {
+                taskList.addTask(result.data);
+                createTable(result.data)
+                getTaskService()
+
+            })
+            .catch(function(err) {
+                console.log(err)
+            })
     }
+
 }
 
 // Chuyển Task
-function changeTask(maId) {
+function changeTask(id) {
     alert("Change Status Success!")
-    taskList.updateTask(maId);
-    createTable(taskList.arr);
-    setLocalStorage();
+    service.updateTaskService(id)
+        .then(function(result) {
+            taskList.updateTask(result.data.id)
+            createTable(result.data.task);
+            console.log(result.data.status)
+        })
+        .catch(function(err) {
+            console.log(err)
+        })
+    getTaskService()
 }
 
 // Xóa Task
-function deleteTask(arr) {
+function deleteTask(id) {
     alert("Delete Status Success!")
-    taskList.deleteTask(arr);
-    createTable(taskList.arr);
-    setLocalStorage();
+
+    service.deleteTaskService(id)
+        .then(function(result) {
+            createTable(result.data);
+            getTaskService()
+        })
+        .catch(function(err) {
+            console.log(err);
+        });
+
 }
 
 
